@@ -18,8 +18,8 @@ router.get('/category/:category', getBooksByCategory);
 router.get('/:id', getBookById);
 router.get('/:id/availability', checkAvailability);
 
-router.post('/', createBook);
-router.put('/:id', updateBook);
-router.delete('/:id', deleteBook);
+router.post('/',protect, createBook);
+router.put('/:id',protect, updateBook);
+router.delete('/:id',protect, deleteBook);
 
 module.exports = router;
