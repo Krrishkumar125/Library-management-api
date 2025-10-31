@@ -254,3 +254,68 @@ exports.checkAvailability = async (req, res) => {
     });
   }
 };
+
+exports.uploadBookCover = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: 'Please upload an image file',
+        error: 'No file uploaded'
+      });
+    }
+    
+    const book = await bookService.uploadBookCover(req.params.id, req.file.path);
+    
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        book: book,
+        file: {
+          filename: req.file.filename,
+          path: req.file.path,
+          size: req.file.size,
+          mimetype: req.file.mimetype
+        }
+      },
+      message: 'Book cover uploaded successfully',
+      error: null
+    });
+  } catch (error) {
+    console.error('Error in uploadBookCover:', error);
+    
+    if (req.file && req.file.path) {
+      const fs = require('fs');
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    }
+    
+    if (error.message === 'Book not found' || error.kind === 'ObjectId') {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: 'Book not found',
+        error: error.message
+      });
+    }
+    
+    if (error.message && error.message.includes('Only image files')) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.message,
+        error: error.message
+      });
+    }
+    
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      data: null,
+      message: 'Server Error while uploading book cover',
+      error: error.message
+    });
+  }
+};
+
