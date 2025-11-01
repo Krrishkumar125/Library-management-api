@@ -28,12 +28,53 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin', 'librarian'],
     default: 'user'
+  },
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^[0-9]{10}$/, 'Please add a valid 10-digit phone number']
+  },
+  address: {
+    street: { type: String, trim: true },
+    city: { type: String, trim: true },
+    state: { type: String, trim: true },
+    zipCode: { type: String, trim: true },
+    country: { type: String, trim: true, default: 'India' }
+  },
+  membershipDate: {
+    type: Date,
+    default: Date.now
+  },
+  membershipStatus: {
+    type: String,
+    enum: ['active', 'inactive', 'suspended'],
+    default: 'active'
+  },
+  profilePicture: {
+    type: String,
+    default: null
+  },
+  booksLoaned: {
+    type: Number,
+    default: 0,
+    min: [0, 'Books loaned cannot be negative']
+  },
+  fineAmount: {
+    type: Number,
+    default: 0,
+    min: [0, 'Fine amount cannot be negative']
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
 });
+
+userSchema.index({ email: 1, membershipStatus: 1 });
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {

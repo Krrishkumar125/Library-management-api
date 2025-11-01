@@ -18,6 +18,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/books', require('./routes/book.routes'));
 app.use('/api/authors', require('./routes/author.routes'));
+app.use('/api/users', require('./routes/user.routes'));
 
 app.get('/', (req, res) => {
   res.json({ 

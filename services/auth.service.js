@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 class AuthService {
   async register(userData) {
-    const { name, email, password, role } = userData;
+    const { name, email, password, role, phone, address } = userData;
     
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -13,7 +13,9 @@ class AuthService {
       name,
       email,
       password,
-      role: role || 'user'
+      role: role || 'user',
+      phone,
+      address
     });
     
     const token = user.getSignedJwtToken();
@@ -23,7 +25,11 @@ class AuthService {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        membershipDate: user.membershipDate,
+        membershipStatus: user.membershipStatus
       },
       token
     };
@@ -53,7 +59,9 @@ class AuthService {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        phone: user.phone,
+        membershipStatus: user.membershipStatus
       },
       token
     };
