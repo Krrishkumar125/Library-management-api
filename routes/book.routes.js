@@ -13,6 +13,9 @@ const {
 } = require('../controllers/book.controller');
 const { protect } = require('../middleware/auth');
 const { bookCoverUpload } = require('../middleware/upload');
+const reviewRoutes = require('./review.routes');
+
+router.use('/:bookId/reviews', reviewRoutes);
 
 router.get('/', getBooks);
 router.get('/search/:query', searchBooks);

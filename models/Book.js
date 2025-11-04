@@ -55,6 +55,17 @@ const bookSchema = new mongoose.Schema({
   coverImage: {
     type: String,
     default: null
+  },
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: [0, 'Rating cannot be less than 0'],
+    max: [5, 'Rating cannot exceed 5']
+  },
+  reviewCount: {
+    type: Number,
+    default: 0,
+    min: [0, 'Review count cannot be negative']
   }
 }, {
   timestamps: true
