@@ -20,8 +20,14 @@ const loanSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Due date is required'],
     validate: {
-      validator: function(value) {
-        return value > this.loanDate;
+      validator: async function(value) {
+        if (!this.loanDate) {
+          const current = await this.model.findById(this._id);
+          if (!current) return false;
+          return value > current.loanDate;
+        } else {
+          return value > this.loanDate;
+        }
       },
       message: 'Due date must be after loan date'
     }
