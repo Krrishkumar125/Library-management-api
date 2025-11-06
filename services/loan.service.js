@@ -96,6 +96,21 @@ class LoanService {
   }
 
   async updateLoan(loanId, updateData) {
+    if (updateData.dueDate) {
+      const existingLoan = await Loan.findById(loanId);
+      
+      if (!existingLoan) {
+        throw new Error('Loan not found');
+      }
+      
+      const loanDate = updateData.loanDate || existingLoan.loanDate;
+      const dueDate = new Date(updateData.dueDate);
+      
+      if (dueDate <= loanDate) {
+        throw new Error('Due date must be after loan date');
+      }
+    }
+    
     const loan = await Loan.findByIdAndUpdate(
       loanId,
       updateData,

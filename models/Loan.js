@@ -21,13 +21,17 @@ const loanSchema = new mongoose.Schema({
     required: [true, 'Due date is required'],
     validate: {
       validator: async function(value) {
-        if (!this.loanDate) {
-          const current = await this.model.findById(this._id);
-          if (!current) return false;
-          return value > current.loanDate;
-        } else {
+        if (this.loanDate) {
           return value > this.loanDate;
         }
+        if (this._id && this.isModified('dueDate')) {
+          const Loan = mongoose.model('Loan');
+          const existing = await Loan.findById(this._id);
+          if (existing && existing.loanDate) {
+            return value > existing.loanDate;
+          }
+        }
+        return true;
       },
       message: 'Due date must be after loan date'
     }
