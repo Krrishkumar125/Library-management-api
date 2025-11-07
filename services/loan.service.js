@@ -174,11 +174,27 @@ class LoanService {
   }
 
   async deleteLoan(loanId) {
-    const loan = await Loan.findByIdAndDelete(loanId);
+    const loan = await Loan.findById(loanId);
     
     if (!loan) {
       throw new Error('Loan not found');
     }
+    
+    if (loan.status === 'active') {
+      const book = await Book.findById(loan.book);
+      if (book) {
+        book.availableCopies += 1;
+        await book.save();
+      }
+      
+      const user = await User.findById(loan.user);
+      if (user && user.booksLoaned > 0) {
+        user.booksLoaned -= 1;
+        await user.save();
+      }
+    }
+    
+    await Loan.findByIdAndDelete(loanId);
     
     return loan;
   }
