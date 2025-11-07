@@ -146,15 +146,20 @@ class LoanService {
     if (loan.returnDate > loan.dueDate) {
       const daysLate = Math.ceil((loan.returnDate - loan.dueDate) / (1000 * 60 * 60 * 24));
       loan.fineAmount = daysLate * 10;
-      
-      const user = await User.findById(loan.user);
-      if (user) {
-        user.fineAmount += loan.fineAmount;
-        await user.save();
-      }
     }
     
     await loan.save();
+    
+    const user = await User.findById(loan.user);
+    if (user) {
+      if (loan.fineAmount > 0) {
+        user.fineAmount += loan.fineAmount;
+      }
+      if (user.booksLoaned > 0) {
+        user.booksLoaned -= 1;
+      }
+      await user.save();
+    }
     
     const book = await Book.findById(loan.book);
     if (book) {
@@ -162,7 +167,7 @@ class LoanService {
       await book.save();
     }
     
-    await loan.populate('user', 'name email phone fineAmount');
+    await loan.populate('user', 'name email phone fineAmount booksLoaned');
     await loan.populate('book', 'title author isbn availableCopies');
     
     return loan;
