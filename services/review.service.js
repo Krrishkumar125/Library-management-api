@@ -96,6 +96,16 @@ class ReviewService {
       }
     ).populate('user', 'name profilePicture');
     
+    if (updateData.rating && updateData.rating !== review.rating) {
+      const allReviews = await Review.find({ book: bookId });
+      const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+      const averageRating = (totalRating / allReviews.length).toFixed(2);
+      
+      await Book.findByIdAndUpdate(bookId, {
+        averageRating: parseFloat(averageRating)
+      });
+    }
+    
     return updatedReview;
   }
 
@@ -115,6 +125,22 @@ class ReviewService {
     }
     
     await Review.findByIdAndDelete(reviewId);
+        const remainingReviews = await Review.find({ book: bookId });
+    
+    if (remainingReviews.length > 0) {
+      const totalRating = remainingReviews.reduce((sum, r) => sum + r.rating, 0);
+      const averageRating = (totalRating / remainingReviews.length).toFixed(2);
+      
+      await Book.findByIdAndUpdate(bookId, {
+        averageRating: parseFloat(averageRating),
+        reviewCount: remainingReviews.length
+      });
+    } else {
+      await Book.findByIdAndUpdate(bookId, {
+        averageRating: 0,
+        reviewCount: 0
+      });
+    }
     
     return review;
   }
